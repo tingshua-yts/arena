@@ -1,0 +1,149 @@
+---
+# Source: etjob/templates/etjob.yaml
+apiVersion: kai.alibabacloud.com/v1alpha1
+kind: TrainingJob
+metadata:
+  name: imagenet-resnet50-normal-spot-777
+  annotations:
+    arena.kubeflow.org/username: "kubecfg:certauth:admin"
+    job-supervisor.kube-ai.io/max-wait-time: "3000"
+    job-supervisor.kube-ai.io/spot-instance: "true"
+    requestGPUsOfJobOwner: "3"
+  labels:
+    app: etjob
+    chart: etjob-0.3.0
+    release: imagenet-resnet50-normal-spot-777
+    heritage: Helm
+    createdBy: "ETJob"
+    arena.kubeflow.org/uid: "3399d840e8b371ed7ca45dda29debeb1"
+    job_name: "imagenet-resnet50-normal-spot-777"
+spec:
+  backoffLimit: 10
+  restartPolicy: OnFailure
+  cleanPodPolicy: Running
+  etReplicaSpecs:
+    launcher:
+      replicas: 1
+      template:
+        metadata:
+          name: imagenet-resnet50-normal-spot-777
+          labels:
+            app: etjob
+            chart: etjob-0.3.0
+            release: imagenet-resnet50-normal-spot-777
+            heritage: Helm
+            createdBy: "ETJob"
+            master-pod-name: imagenet-resnet50-normal-spot-777-launcher
+            arena.kubeflow.org/uid: "3399d840e8b371ed7ca45dda29debeb1"
+            job_name: "imagenet-resnet50-normal-spot-777"
+          annotations:
+            arena.kubeflow.org/username: "kubecfg:certauth:admin"
+            job-supervisor.kube-ai.io/max-wait-time: "3000"
+            job-supervisor.kube-ai.io/spot-instance: "true"
+            requestGPUsOfJobOwner: "3"
+        spec:
+          nodeSelector:
+            instance_type: "spot-launcher"
+          volumes:
+          - name: "imagenet-pvc"
+            persistentVolumeClaim:
+              claimName: "imagenet-pvc"
+          - name: dshm
+            emptyDir:
+              medium: Memory
+              sizeLimit: 2Gi
+          containers:
+          - image: "ai-studio-registry.cn-beijing.cr.aliyuncs.com/kube-ai/horovod:0.26"
+            name: et
+            imagePullPolicy: Always
+            workingDir: /mnt
+            command:
+            - "sh"
+            - "-c"
+            - "horovodrun --log-level DEBUG --verbose
+    -np $((${workers}*${gpus}))
+    --min-np $((${minWorkers}*${gpus}))
+    --max-np $((${maxWorkers}*${gpus}))
+    --host-discovery-script /etc/edl/discover_hosts.sh
+    python /mnt/example/imagenet/pytorch_imagenet_resnet50_elastic.py  --epochs=100 --num-workers=6 --train-dir=/mnt/data/imageNet/ILSVRC/Data/CLS-LOC-MINI/train --val-dir=/mnt/data/imageNet/ILSVRC/Data/CLS-LOC-MINI/val --checkpoint-format=./imagenet-resnet50-normal-spot-777-checkpoint-{epoch}.pth.tar --name=imagenet-resnet50-normal-spot-777"
+            resources:
+              requests:
+                cpu: "3"
+                memory: "25Gi"
+              limits:
+                cpu: "3"
+                memory: "25Gi"
+            env:
+            - name: "gpus"
+              value: "1"
+            - name: "maxWorkers"
+              value: "128"
+            - name: "minWorkers"
+              value: "1"
+            - name: "workers"
+              value: "3"
+            volumeMounts:
+            - name: "imagenet-pvc"
+              mountPath: "/mnt"
+            - name: dshm
+              mountPath: /dev/shm
+    worker:
+      restartPolicy: Always
+      replicas: 3
+      maxReplicas: 128
+      minReplicas: 1
+      template:
+        metadata:
+          name: imagenet-resnet50-normal-spot-777
+          labels:
+            app: etjob
+            chart: etjob-0.3.0
+            release: imagenet-resnet50-normal-spot-777
+            heritage: Helm
+            createdBy: "ETJob"
+            arena.kubeflow.org/uid: "3399d840e8b371ed7ca45dda29debeb1"
+            job_name: "imagenet-resnet50-normal-spot-777"
+          annotations:
+            arena.kubeflow.org/username: "kubecfg:certauth:admin"
+            job-supervisor.kube-ai.io/max-wait-time: "3000"
+            job-supervisor.kube-ai.io/spot-instance: "true"
+            requestGPUsOfJobOwner: "3"
+        spec:
+          nodeSelector:
+            instance_type: "spot"
+          volumes:
+          - name: "imagenet-pvc"
+            persistentVolumeClaim:
+              claimName: "imagenet-pvc"
+          - name: dshm
+            emptyDir:
+              medium: Memory
+              sizeLimit: 2Gi
+          containers:
+            - image: "ai-studio-registry.cn-beijing.cr.aliyuncs.com/kube-ai/horovod:0.26"
+              name: et
+              imagePullPolicy: Always
+              workingDir: /mnt
+              resources:
+                requests:
+                    nvidia.com/gpu: "1"
+                    cpu: "3"
+                    memory: "25Gi"
+                limits:
+                    nvidia.com/gpu: "1"
+                    cpu: "3"
+                    memory: "25Gi"
+              env:
+              - name: "gpus"
+                value: "1"
+              - name: "maxWorkers"
+                value: "128"
+              - name: "minWorkers"
+                value: "1"
+              - name: "workers"
+                value: "3"
+              volumeMounts:
+              - name: "imagenet-pvc"
+                mountPath: "/mnt"
+              - name: dshm
+                mountPath: /dev/shm

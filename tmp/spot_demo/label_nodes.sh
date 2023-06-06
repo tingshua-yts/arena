@@ -1,0 +1,1 @@
+kubectl  label node cn-beijing.192.168.9.1 cn-beijing.192.168.9.3 cn-beijing.192.168.9.4 test-scale-in=true

@@ -1,0 +1,11 @@
+./arena serve tensorflow \
+  --namespace=default-group \
+  --name=mymnist1 \
+  --model-name=mnist1  \
+  --gpus=1  \
+  --image=tensorflow/serving:latest-gpu \
+  --data=tfserve-oss-pvc:/tfmodel \
+  --model-path=/tfmodel/test_arena/tfserve/mnist/ \
+  --env="key1=value1" \
+  --env="key2=value2" \
+  --version-policy=specific:1

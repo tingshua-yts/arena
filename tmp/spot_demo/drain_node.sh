@@ -1,0 +1,1 @@
+kubectl drain node/cn-hangzhou.192.168.0.136 --delete-emptydir-data --ignore-daemonsets

@@ -1,0 +1,78 @@
+apiVersion: v1
+data:
+  app: trainingjob.kai.alibabacloud.com/elastic-training
+  etjob: 0.2.0
+  values: |
+    cpu: ""
+    memory: ""
+    nodeSelectors: {}
+    configFiles: {}
+    tolerations: []
+    image: registry.cn-hangzhou.aliyuncs.com/ai-samples/horovod:0.20.0-tf2.3.0-torch1.6.0-mxnet1.6.0.post0-py3.7-cuda10.1
+    gpuCount: 1
+    envs:
+      gpus: "1"
+      maxWorkers: "9"
+      minWorkers: "1"
+      workers: "3"
+    workingDir: /examples
+    shell: sh
+    command: "horovodrun\n    -np $((${workers}*${gpus}))\n    --min-np $((${minWorkers}*${gpus}))\n    --max-np $((${maxWorkers}*${gpus}))\n    --host-discovery-script /etc/edl/discover_hosts.sh\n    python /examples/elastic/tensorflow2_mnist_elastic.py\n    "
+    mode: ""
+    workers: 3
+    retry: 0
+    dataset: {}
+    dataDirs: []
+    enableRDMA: false
+    enableQueue: false
+    useENI: false
+    annotations:
+      arena.kubeflow.org/username: kubecfg:certauth:admin
+      requestGPUsOfJobOwner: "3"
+    labels:
+      arena.kubeflow.org/uid: 3399d840e8b371ed7ca45dda29debeb1
+    isNonRoot: true
+    podSecurityContext:
+      runAsUser: 501
+      runAsNonRoot: true
+      runAsGroup: 20
+      supplementalGroups:
+      - 20
+      - 12
+      - 61
+      - 79
+      - 80
+      - 81
+      - 98
+      - 701
+      - 33
+      - 100
+      - 204
+      - 250
+      - 395
+      - 398
+      - 101
+      - 400
+    priorityClassName: ""
+    coscheduling: false
+    podGroupName: ""
+    podGroupMinAvailable: ""
+    imagePullSecrets: []
+    useTensorboard: false
+    tensorboardImage: registry.cn-zhangjiakou.aliyuncs.com/tensorflow-samples/tensorflow:1.12.0-devel
+    trainingLogdir: /training_logs
+    hostLogPath: ""
+    isLocalLogging: false
+    syncMode: ""
+    syncSource: ""
+    maxWorkers: 9
+    minWorkers: 1
+kind: ConfigMap
+metadata:
+  creationTimestamp: "2022-09-15T04:48:45Z"
+  labels:
+    createdBy: arena
+  name: elastic-training-etjob
+  namespace: default
+  resourceVersion: "34044"
+  uid: 2bf0fee9-fab7-4fbf-a781-b918cf017f4d

@@ -1,0 +1,16 @@
+apiVersion: data.fluid.io/v1alpha1
+kind: Dataset
+metadata:
+  name: fluid-imagenet
+spec:
+  mounts:
+  - mountPoint: pvc://imagenet-pvc
+    name: nfs-imagenet
+  nodeAffinity:
+    required:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: instance_type
+              operator: In
+              values:
+                - spot

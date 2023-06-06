@@ -1,0 +1,17 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: pi
+  namespace: default-group
+  labels:
+    job-key: pi
+spec:
+  parallelism: 3
+  template:
+    spec:
+      containers:
+      - name: pi
+        image: busybox:stable
+        command: ["sh",  "-c", "while true; do echo hello; sleep 2; done"]
+      restartPolicy: Never
+  backoffLimit: 4

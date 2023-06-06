@@ -1,0 +1,39 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: tfserve-oss-pv
+spec:
+  accessModes:
+  - ReadWriteMany
+  capacity:
+    storage: 10Gi
+  csi:
+    driver: ossplugin.csi.alibabacloud.com
+    volumeAttributes:
+      bucket: test-ai-studio
+      otherOpts: ""
+      url: oss-cn-beijing.aliyuncs.com
+      akId: "LTAI5tCZucTEYsb2RvtwSp29"
+      akSecret: "7u1803kYnwSsmhGDAJrj39oR8jJN4U"
+    volumeHandle: tfserve-oss-pv
+  persistentVolumeReclaimPolicy: Retain
+  storageClassName: oss
+  volumeMode: Filesystem
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: tfserve-oss-pvc
+  namespace: default-group
+spec:
+  accessModes:
+  - ReadWriteMany
+  resources:
+    requests:
+      storage: 10Gi
+  selector:
+    matchLabels:
+      alicloud-pvname: tfserve-oss-pv
+  storageClassName: oss
+  volumeMode: Filesystem
+  volumeName: tfserve-oss-pv  

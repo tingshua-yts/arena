@@ -1,0 +1,255 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    arena.kubeflow.org/username: kubecfg:certauth:admin
+    kubernetes.io/psp: ack.privileged
+    requestGPUsOfJobOwner: "12"
+  creationTimestamp: "2022-11-07T12:50:35Z"
+  labels:
+    app: etjob
+    arena.kubeflow.org/uid: 3399d840e8b371ed7ca45dda29debeb1
+    chart: etjob-0.2.0
+    createdBy: ETJob
+    group-name: kai.alibabacloud.com
+    heritage: Helm
+    job_name: imagenet-resnet50-normal-spot-12998
+    master-pod-name: imagenet-resnet50-normal-spot-12998-launcher
+    release: imagenet-resnet50-normal-spot-12998
+    training-job-name: imagenet-resnet50-normal-spot-12998
+    training-job-role: launcher
+  name: imagenet-resnet50-normal-spot-12998-launcher
+  namespace: default-group
+  ownerReferences:
+  - apiVersion: kai.alibabacloud.com/v1alpha1
+    blockOwnerDeletion: true
+    controller: true
+    kind: TrainingJob
+    name: imagenet-resnet50-normal-spot-12998
+    uid: 20e0ad6d-0c6f-4e9d-bd2a-080b39203f62
+  resourceVersion: "43473367"
+  uid: c4d54f89-94a2-4d8c-9aeb-f4c2dca96212
+spec:
+  containers:
+  - command:
+    - sh
+    - -c
+    - horovodrun --log-level DEBUG --verbose -np $((${workers}*${gpus})) --min-np
+      $((${minWorkers}*${gpus})) --max-np $((${maxWorkers}*${gpus})) --host-discovery-script
+      /etc/edl/discover_hosts.sh python /mnt/example/imagenet/pytorch_imagenet_resnet50_elastic.py
+      --epochs=200 --num-workers=6 --train-dir=/mnt/data/imageNet/ILSVRC/Data/CLS-LOC/train
+      --val-dir=/mnt/data/imageNet/ILSVRC/Data/CLS-LOC/val --skip-restore --checkpoint-format=./small-checkpoint-{epoch}.pth.tar
+      --name=imagenet-resnet50-normal-spot-12998
+    env:
+    - name: gpus
+      value: "1"
+    - name: maxWorkers
+      value: "128"
+    - name: minWorkers
+      value: "1"
+    - name: workers
+      value: "12"
+    image: ai-studio-registry.cn-beijing.cr.aliyuncs.com/kube-ai/horovod:0.26
+    imagePullPolicy: Always
+    name: et
+    resources:
+      limits:
+        cpu: "7"
+        memory: 25Gi
+      requests:
+        cpu: "7"
+        memory: 25Gi
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /mnt
+      name: imagenet-pvc
+    - mountPath: /dev/shm
+      name: dshm
+    - mountPath: /etc/edl
+      name: training-job-hostfile
+    - mountPath: /etc/mpi
+      name: training-job-config
+    - mountPath: /opt/kube
+      name: training-job-kubectl
+    - mountPath: /root/.ssh
+      name: imagenet-resnet50-normal-spot-12998
+      subPath: .ssh
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-gs2ts
+      readOnly: true
+    workingDir: /mnt
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  hostIPC: true
+  hostPID: true
+  initContainers:
+  - command:
+    - sh
+    - -c
+    - cp /etc/mpi/hostfile /etc/edl/hostfile && chmod 600 /etc/edl/hostfile && cp
+      /etc/mpi/discover_hosts.sh /etc/edl/discover_hosts.sh && chmod +x /etc/edl/discover_hosts.sh
+    image: alpine:3.10
+    imagePullPolicy: IfNotPresent
+    name: init-hostfile
+    resources:
+      limits:
+        cpu: 100m
+        ephemeral-storage: 5Gi
+        memory: 512Mi
+      requests:
+        cpu: 100m
+        ephemeral-storage: 5Gi
+        memory: 512Mi
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /etc/edl
+      name: training-job-hostfile
+    - mountPath: /etc/mpi
+      name: training-job-config
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-gs2ts
+      readOnly: true
+  nodeName: cn-beijing.192.168.8.251
+  nodeSelector:
+    instance_type: spot-launcher
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Never
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: imagenet-resnet50-normal-spot-12998-launcher
+  serviceAccountName: imagenet-resnet50-normal-spot-12998-launcher
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - key: exp
+    operator: Exists
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - name: imagenet-pvc
+    persistentVolumeClaim:
+      claimName: imagenet-pvc
+  - emptyDir:
+      medium: Memory
+      sizeLimit: 2Gi
+    name: dshm
+  - emptyDir: {}
+    name: training-job-hostfile
+  - emptyDir: {}
+    name: training-job-kubectl
+  - configMap:
+      defaultMode: 420
+      items:
+      - key: hostfile
+        mode: 292
+        path: hostfile
+      - key: discover_hosts.sh
+        mode: 292
+        path: discover_hosts.sh
+      - key: kubexec.sh
+        mode: 365
+        path: kubexec.sh
+      name: imagenet-resnet50-normal-spot-12998-config
+    name: training-job-config
+  - name: imagenet-resnet50-normal-spot-12998
+    secret:
+      defaultMode: 384
+      items:
+      - key: id_rsa
+        path: .ssh/id_rsa
+      - key: id_rsa.pub
+        path: .ssh/id_rsa.pub
+      - key: id_rsa.pub
+        path: .ssh/authorized_keys
+      - key: config
+        path: .ssh/config
+      secretName: imagenet-resnet50-normal-spot-12998
+  - name: kube-api-access-gs2ts
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
+status:
+  conditions:
+  - lastProbeTime: null
+    lastTransitionTime: "2022-11-07T12:50:46Z"
+    status: "True"
+    type: Initialized
+  - lastProbeTime: null
+    lastTransitionTime: "2022-11-07T13:09:00Z"
+    message: 'containers with unready status: [et]'
+    reason: ContainersNotReady
+    status: "False"
+    type: Ready
+  - lastProbeTime: null
+    lastTransitionTime: "2022-11-07T13:09:00Z"
+    message: 'containers with unready status: [et]'
+    reason: ContainersNotReady
+    status: "False"
+    type: ContainersReady
+  - lastProbeTime: null
+    lastTransitionTime: "2022-11-07T12:50:35Z"
+    status: "True"
+    type: PodScheduled
+  containerStatuses:
+  - containerID: containerd://e84ceac0e594e9f5d7854117fed89630be136fb87d0b39df8d9af6740f4750eb
+    image: ai-studio-registry.cn-beijing.cr.aliyuncs.com/kube-ai/horovod:0.26
+    imageID: ai-studio-registry.cn-beijing.cr.aliyuncs.com/kube-ai/horovod@sha256:2bb4d707d8ab5590efb7af042e40cafe4f5b4983913f90afefbd2f100c9d4a28
+    lastState: {}
+    name: et
+    ready: false
+    restartCount: 0
+    started: false
+    state:
+      terminated:
+        containerID: containerd://e84ceac0e594e9f5d7854117fed89630be136fb87d0b39df8d9af6740f4750eb
+        exitCode: 143
+        finishedAt: "2022-11-07T13:08:58Z"
+        reason: Error
+        startedAt: "2022-11-07T12:58:57Z"
+  hostIP: 192.168.8.251
+  initContainerStatuses:
+  - containerID: containerd://a7ac99e658c13a0175f6ed517f547b0fdeba7b63a80baab3e071cdd82a6fccbe
+    image: docker.io/library/alpine:3.10
+    imageID: docker.io/library/alpine@sha256:451eee8bedcb2f029756dc3e9d73bab0e7943c1ac55cff3a4861c52a0fdd3e98
+    lastState: {}
+    name: init-hostfile
+    ready: true
+    restartCount: 0
+    state:
+      terminated:
+        containerID: containerd://a7ac99e658c13a0175f6ed517f547b0fdeba7b63a80baab3e071cdd82a6fccbe
+        exitCode: 0
+        finishedAt: "2022-11-07T12:50:45Z"
+        reason: Completed
+        startedAt: "2022-11-07T12:50:45Z"
+  message: 'The node was low on resource: ephemeral-storage. Container et was using
+    240Ki, which exceeds its request of 0. '
+  phase: Failed
+  podIP: 10.73.16.5
+  podIPs:
+  - ip: 10.73.16.5
+  qosClass: Guaranteed
+  reason: Evicted
+  startTime: "2022-11-07T12:50:35Z"

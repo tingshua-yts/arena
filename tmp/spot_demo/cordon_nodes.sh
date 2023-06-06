@@ -1,0 +1,1 @@
+kubectl cordon 	cn-beijing.192.168.9.66 cn-beijing.192.168.9.67 cn-beijing.192.168.9.68

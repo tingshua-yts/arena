@@ -1,0 +1,99 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: custom-serving
+    arena.kubeflow.org/uid: 3399d840e8b371ed7ca45dda29debeb1
+    chart: custom-serving-0.8.0
+    heritage: Helm
+    release: fast-style-transfer-alpha
+    serviceName: fast-style-transfer
+    servingName: fast-style-transfer
+    servingType: custom-serving
+    servingVersion: alpha
+  name: fast-style-transfer-alpha-custom-serving-test
+  namespace: default-group
+  resourceVersion: "42893411"
+  uid: 05d6579b-15db-42ab-b4b2-8c75269202c4
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      app: custom-serving
+      release: fast-style-transfer-alpha
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      annotations:
+        arena.kubeflow.org/username: kubecfg:certauth:admin
+      creationTimestamp: null
+      labels:
+        app: custom-serving
+        arena.kubeflow.org/uid: 3399d840e8b371ed7ca45dda29debeb1
+        chart: custom-serving-0.8.0
+        heritage: Helm
+        release: fast-style-transfer-alpha
+        serviceName: fast-style-transfer
+        servingName: fast-style-transfer
+        servingType: custom-serving
+        servingVersion: alpha
+    spec:
+      containers:
+      - command:
+        - sh
+        - -c
+        - python app.py
+        env:
+        - name: ARENA_NODE_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: spec.nodeName
+        - name: ARENA_POD_NAMESPACE
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+        - name: ARENA_POD_NAME
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.name
+        - name: ARENA_POD_IP
+          valueFrom:
+            fieldRef:
+              apiVersion: v1
+              fieldPath: status.podIP
+        - name: KEY1
+          value: vvvv
+        image: happy365/fast-style-transfer:latest
+        imagePullPolicy: IfNotPresent
+        name: custom-serving
+        ports:
+        - containerPort: 5000
+          name: restful
+          protocol: TCP
+        resources:
+          limits:
+            nvidia.com/gpu: "1"
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts:
+        - mountPath: /data
+          name: fashion-pvc
+          subPathExpr: $(KEY1)
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: fashion-pvc
+        persistentVolumeClaim:
+          claimName: fashion-pvc

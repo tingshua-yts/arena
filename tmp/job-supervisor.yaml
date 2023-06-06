@@ -1,0 +1,53 @@
+# Source: arena-artifacts/charts/job-supervisor/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: job-supervisor
+    helm.sh/chart: arena-artifacts
+    app.kubeflow.org/managed-by: arena
+  name: job-supervisor
+  namespace: arena-system
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: job-supervisor
+      helm.sh/chart: arena-artifacts
+      app.kubeflow.org/managed-by: arena
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        helm.sh/chart: arena-artifacts
+        app.kubeflow.org/managed-by: arena
+        app: job-supervisor
+    spec:
+      nodeSelector:
+
+
+      tolerations:
+
+      containers:
+        - command:
+            - /job-supervisor
+          image: registry.cn-zhangjiakou.aliyuncs.com/acs/job-supervisor:v0.1.1-3e98633-aliyun
+          imagePullPolicy: IfNotPresent
+          name: job-supervisor
+          resources:
+            limits:
+              cpu: 300m
+              memory: 500Mi
+            requests:
+              cpu: 100m
+              memory: 300Mi
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      serviceAccount: ack-arena
+      serviceAccountName: ack-arena
+      terminationGracePeriodSeconds: 30

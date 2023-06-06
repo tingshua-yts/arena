@@ -1,0 +1,169 @@
+apiVersion: kai.alibabacloud.com/v1alpha1
+kind: TrainingJob
+metadata:
+  annotations:
+    arena.kubeflow.org/username: kubecfg:certauth:admin
+    kubectl.kubernetes.io/last-applied-configuration: |
+      {"apiVersion":"kai.alibabacloud.com/v1alpha1","kind":"TrainingJob","metadata":{"annotations":{"arena.kubeflow.org/username":"kubecfg:certauth:admin","requestGPUsOfJobOwner":"3"},"labels":{"app":"etjob","arena.kubeflow.org/uid":"3399d840e8b371ed7ca45dda29debeb1","chart":"etjob-0.2.0","createdBy":"ETJob","heritage":"Helm","job_name":"imagenet-resnet50-small-spot","release":"imagenet-resnet50-small-spot"},"name":"imagenet-resnet50-small-spot","namespace":"default-group"},"spec":{"cleanPodPolicy":"Running","etReplicaSpecs":{"launcher":{"replicas":1,"template":{"metadata":{"annotations":{"arena.kubeflow.org/username":"kubecfg:certauth:admin","requestGPUsOfJobOwner":"3"},"labels":{"app":"etjob","arena.kubeflow.org/uid":"3399d840e8b371ed7ca45dda29debeb1","chart":"etjob-0.2.0","createdBy":"ETJob","heritage":"Helm","job_name":"imagenet-resnet50-small-spot","master-pod-name":"imagenet-resnet50-small-spot-launcher","release":"imagenet-resnet50-small-spot"},"name":"imagenet-resnet50-small-spot"},"spec":{"containers":[{"command":["sh","-c","horovodrun --log-level DEBUG --verbose -np $((${workers}*${gpus})) --min-np $((${minWorkers}*${gpus})) --max-np $((${maxWorkers}*${gpus})) --host-discovery-script /etc/edl/discover_hosts.sh python /mnt/example/imagenet/pytorch_imagenet_resnet50_elastic.py --epochs=20 --num-workers=16 --train-dir=/mnt/data/imageNet/ILSVRC/Data/CLS-LOC-MINI/train --val-dir=/mnt/data/imageNet/ILSVRC/Data/CLS-LOC-MINI/val --skip-restore --checkpoint-format=./small-spot-checkpoint-{epoch}.pth.tar "],"env":[{"name":"gpus","value":"1"},{"name":"maxWorkers","value":"128"},{"name":"minWorkers","value":"1"},{"name":"workers","value":"3"}],"image":"ai-studio-registry.cn-beijing.cr.aliyuncs.com/kube-ai/horovod:0.26","imagePullPolicy":"Always","name":"et","resources":{"limits":{"cpu":"16","memory":"32Gi"},"requests":{"cpu":"16","memory":"32Gi"}},"volumeMounts":[{"mountPath":"/mnt","name":"imagenet-pvc"},{"mountPath":"/dev/shm","name":"dshm"}],"workingDir":"/mnt"}],"hostIPC":true,"hostPID":true,"nodeSelector":{"instance_type":"spot"},"volumes":[{"name":"imagenet-pvc","persistentVolumeClaim":{"claimName":"imagenet-pvc"}},{"emptyDir":{"medium":"Memory","sizeLimit":"2Gi"},"name":"dshm"}]}}},"worker":{"maxReplicas":128,"minReplicas":1,"replicas":3,"template":{"metadata":{"annotations":{"arena.kubeflow.org/username":"kubecfg:certauth:admin","requestGPUsOfJobOwner":"3"},"labels":{"app":"etjob","chart":"etjob-0.2.0","createdBy":"ETJob","heritage":"Helm","release":"imagenet-resnet50-small-spot"},"name":"imagenet-resnet50-small-spot"},"spec":{"containers":[{"env":[{"name":"gpus","value":"1"},{"name":"maxWorkers","value":"128"},{"name":"minWorkers","value":"1"},{"name":"workers","value":"3"}],"image":"ai-studio-registry.cn-beijing.cr.aliyuncs.com/kube-ai/horovod:0.26","imagePullPolicy":"Always","name":"et","resources":{"limits":{"cpu":"16","memory":"32Gi","nvidia.com/gpu":"1"},"requests":{"cpu":"16","memory":"32Gi","nvidia.com/gpu":"1"}},"volumeMounts":[{"mountPath":"/mnt","name":"imagenet-pvc"},{"mountPath":"/dev/shm","name":"dshm"}],"workingDir":"/mnt"}],"hostIPC":true,"hostPID":true,"nodeSelector":{"instance_type":"spot"},"volumes":[{"name":"imagenet-pvc","persistentVolumeClaim":{"claimName":"imagenet-pvc"}},{"emptyDir":{"medium":"Memory","sizeLimit":"2Gi"},"name":"dshm"}]}}}}}}
+    requestGPUsOfJobOwner: "3"
+  creationTimestamp: "2022-10-26T11:42:13Z"
+  generation: 1
+  labels:
+    app: etjob
+    arena.kubeflow.org/uid: 3399d840e8b371ed7ca45dda29debeb1
+    chart: etjob-0.2.0
+    createdBy: ETJob
+    heritage: Helm
+    job_name: imagenet-resnet50-small-spot
+    release: imagenet-resnet50-small-spot
+  name: imagenet-resnet50-small-spot
+  namespace: default-group
+  resourceVersion: "33947286"
+  uid: f89cca9a-c3cb-410c-921b-385cf1a2eb6e
+spec:
+  cleanPodPolicy: Running
+  etReplicaSpecs:
+    launcher:
+      replicas: 1
+      template:
+        metadata:
+          annotations:
+            arena.kubeflow.org/username: kubecfg:certauth:admin
+            requestGPUsOfJobOwner: "3"
+          labels:
+            app: etjob
+            arena.kubeflow.org/uid: 3399d840e8b371ed7ca45dda29debeb1
+            chart: etjob-0.2.0
+            createdBy: ETJob
+            heritage: Helm
+            job_name: imagenet-resnet50-small-spot
+            master-pod-name: imagenet-resnet50-small-spot-launcher
+            release: imagenet-resnet50-small-spot
+          name: imagenet-resnet50-small-spot
+        spec:
+          containers:
+          - command:
+            - sh
+            - -c
+            - 'horovodrun --log-level DEBUG --verbose -np $((${workers}*${gpus}))
+              --min-np $((${minWorkers}*${gpus})) --max-np $((${maxWorkers}*${gpus}))
+              --host-discovery-script /etc/edl/discover_hosts.sh python /mnt/example/imagenet/pytorch_imagenet_resnet50_elastic.py
+              --epochs=20 --num-workers=16 --train-dir=/mnt/data/imageNet/ILSVRC/Data/CLS-LOC-MINI/train
+              --val-dir=/mnt/data/imageNet/ILSVRC/Data/CLS-LOC-MINI/val --skip-restore
+              --checkpoint-format=./small-spot-checkpoint-{epoch}.pth.tar '
+            env:
+            - name: gpus
+              value: "1"
+            - name: maxWorkers
+              value: "128"
+            - name: minWorkers
+              value: "1"
+            - name: workers
+              value: "3"
+            image: ai-studio-registry.cn-beijing.cr.aliyuncs.com/kube-ai/horovod:0.26
+            imagePullPolicy: Always
+            name: et
+            resources:
+              limits:
+                cpu: "16"
+                memory: 32Gi
+              requests:
+                cpu: "16"
+                memory: 32Gi
+            volumeMounts:
+            - mountPath: /mnt
+              name: imagenet-pvc
+            - mountPath: /dev/shm
+              name: dshm
+            workingDir: /mnt
+          hostIPC: true
+          hostPID: true
+          nodeSelector:
+            instance_type: spot
+          volumes:
+          - name: imagenet-pvc
+            persistentVolumeClaim:
+              claimName: imagenet-pvc
+          - emptyDir:
+              medium: Memory
+              sizeLimit: 2Gi
+            name: dshm
+    worker:
+      maxReplicas: 128
+      minReplicas: 1
+      replicas: 3
+      template:
+        metadata:
+          annotations:
+            arena.kubeflow.org/username: kubecfg:certauth:admin
+            requestGPUsOfJobOwner: "3"
+          labels:
+            app: etjob
+            chart: etjob-0.2.0
+            createdBy: ETJob
+            heritage: Helm
+            release: imagenet-resnet50-small-spot
+          name: imagenet-resnet50-small-spot
+        spec:
+          containers:
+          - env:
+            - name: gpus
+              value: "1"
+            - name: maxWorkers
+              value: "128"
+            - name: minWorkers
+              value: "1"
+            - name: workers
+              value: "3"
+            image: ai-studio-registry.cn-beijing.cr.aliyuncs.com/kube-ai/horovod:0.26
+            imagePullPolicy: Always
+            name: et
+            resources:
+              limits:
+                cpu: "16"
+                memory: 32Gi
+                nvidia.com/gpu: "1"
+              requests:
+                cpu: "16"
+                memory: 32Gi
+                nvidia.com/gpu: "1"
+            volumeMounts:
+            - mountPath: /mnt
+              name: imagenet-pvc
+            - mountPath: /dev/shm
+              name: dshm
+            workingDir: /mnt
+          hostIPC: true
+          hostPID: true
+          nodeSelector:
+            instance_type: spot
+          volumes:
+          - name: imagenet-pvc
+            persistentVolumeClaim:
+              claimName: imagenet-pvc
+          - emptyDir:
+              medium: Memory
+              sizeLimit: 2Gi
+            name: dshm
+status:
+  conditions:
+  - lastTransitionTime: "2022-10-26T11:42:13Z"
+    lastUpdateTime: "2022-10-26T11:42:13Z"
+    message: TrainingJob imagenet-resnet50-small-spot is created.
+    reason: TrainingJobCreated
+    status: "True"
+    type: Created
+  - lastTransitionTime: "2022-10-26T11:42:13Z"
+    lastUpdateTime: "2022-10-26T11:42:13Z"
+    message: create trainingjob(default-group/imagenet-resnet50-small-spot) workers
+    status: "True"
+    type: WorkersCreated
+  phase: Created
+  replicaStatuses:
+    Launcher: {}
+    Worker: {}
+  startTime: "2022-10-26T11:42:13Z"
+  targetWorkers:
+  - imagenet-resnet50-small-spot-worker-0
+  - imagenet-resnet50-small-spot-worker-1
+  - imagenet-resnet50-small-spot-worker-2

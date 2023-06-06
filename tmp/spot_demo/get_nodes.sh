@@ -1,0 +1,1 @@
+kubectl get nodes -l instance_type=spot

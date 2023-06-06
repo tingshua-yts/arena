@@ -1,0 +1,52 @@
+apiVersion: kai.alibabacloud.com/v1alpha1
+kind: TrainingJob
+metadata:
+  name: worker3-scale29-aiacc-run2
+  namespace: default
+spec:
+  cleanPodPolicy: Running
+  etReplicaSpecs:
+    launcher:
+      replicas: 1
+      template:
+        spec:
+          imagePullSecrets:
+          - name: regcred
+          containers:
+          - command:
+            - sh
+            - -c
+            - horovodrun --log-level DEBUG --verbose -np 3 --min-np 1 --max-np 128 --host-discovery-script
+              /etc/edl/discover_hosts.sh python /mnt/example/imagenet/pytorch_imagenet_resnet50_elastic.py
+              --train-dir=/mnt/data/imageNet/ILSVRC/Data/CLS-LOC/train --val-dir=/mnt/data/imageNet/ILSVRC/Data/CLS-LOC/val
+            image: registry.cn-hangzhou.aliyuncs.com/ai-samples/horovod:0.20.0-tf2.3.0-torch1.6.0-mxnet1.6.0.post0-py3.7-cuda10.1
+            #image: registry.cn-huhehaote.aliyuncs.com/cto_office/elastic-perseus-arena:centos7-cuda10.0-1.3.3-1.15-py36-mnist
+            imagePullPolicy: Always
+            name: mnist-elastic
+            env:
+            - name: aliyun_logs_worker3-scale29-aiacc-run2-stdout
+              value: stdout
+    worker:
+      maxReplicas: 128
+      minReplicas: 1
+      replicas: 3
+      template:
+        spec:
+          imagePullSecrets:
+          - name: regcred
+          containers:
+          - image: registry.cn-hangzhou.aliyuncs.com/ai-samples/horovod:0.20.0-tf2.3.0-torch1.6.0-mxnet1.6.0.post0-py3.7-cuda10.1
+            imagePullPolicy: Always
+            name: mnist-elastic
+            volumeMounts:
+              - name: imagenet-dataset
+                mountPath: /mnt/
+            resources:
+              limits:
+                nvidia.com/gpu: "1"
+              requests:
+                nvidia.com/gpu: "1"
+          volumes:
+            - name: imagenet-dataset
+              persistentVolumeClaim:
+                claimName: imagenet-pvc

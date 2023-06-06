@@ -1,0 +1,1 @@
+kubectl uncordon node/cn-beijing.192.168.9.68 node/cn-beijing.192.168.9.64 node/cn-beijing.192.168.9.63

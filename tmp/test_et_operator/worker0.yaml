@@ -1,0 +1,122 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  annotations:
+    arena.kubeflow.org/username: kubecfg:certauth:admin
+    kubernetes.io/psp: ack.privileged
+    requestGPUsOfJobOwner: "3"
+  creationTimestamp: "2022-09-15T04:30:26Z"
+  labels:
+    app: etjob
+    chart: etjob-0.2.0
+    createdBy: ETJob
+    group-name: kai.alibabacloud.com
+    heritage: Helm
+    release: elastic-training
+    replica-index: "0"
+    training-job-name: elastic-training
+    training-job-role: worker
+  name: elastic-training-worker-0
+  namespace: default
+  ownerReferences:
+  - apiVersion: kai.alibabacloud.com/v1alpha1
+    blockOwnerDeletion: true
+    controller: true
+    kind: TrainingJob
+    name: elastic-training
+    uid: 0e5ace1f-a59f-4b9c-b93e-9f28bbc3d258
+  resourceVersion: "23696"
+  uid: 3e724e07-d059-401a-81d1-726be896d5b0
+spec:
+  containers:
+  - command:
+    - sh
+    - -c
+    - /usr/sbin/sshd  && sleep 365d
+    env:
+    - name: gpus
+      value: "1"
+    - name: maxWorkers
+      value: "9"
+    - name: minWorkers
+      value: "1"
+    - name: workers
+      value: "3"
+    image: registry.cn-hangzhou.aliyuncs.com/ai-samples/horovod:0.20.0-tf2.3.0-torch1.6.0-mxnet1.6.0.post0-py3.7-cuda10.1
+    imagePullPolicy: Always
+    name: et
+    resources:
+      limits:
+        nvidia.com/gpu: "1"
+      requests:
+        nvidia.com/gpu: "1"
+    terminationMessagePath: /dev/termination-log
+    terminationMessagePolicy: File
+    volumeMounts:
+    - mountPath: /dev/shm
+      name: dshm
+    - mountPath: /root/.ssh
+      name: elastic-training
+      subPath: .ssh
+    - mountPath: /var/run/secrets/kubernetes.io/serviceaccount
+      name: kube-api-access-qj8zb
+      readOnly: true
+    workingDir: /examples
+  dnsPolicy: ClusterFirst
+  enableServiceLinks: true
+  hostIPC: true
+  hostPID: true
+  nodeName: cn-beijing.192.168.9.11
+  preemptionPolicy: PreemptLowerPriority
+  priority: 0
+  restartPolicy: Never
+  schedulerName: default-scheduler
+  securityContext: {}
+  serviceAccount: default
+  serviceAccountName: default
+  terminationGracePeriodSeconds: 30
+  tolerations:
+  - effect: NoExecute
+    key: node.kubernetes.io/not-ready
+    operator: Exists
+    tolerationSeconds: 300
+  - effect: NoExecute
+    key: node.kubernetes.io/unreachable
+    operator: Exists
+    tolerationSeconds: 300
+  volumes:
+  - emptyDir:
+      medium: Memory
+      sizeLimit: 16Gi
+    name: dshm
+  - name: elastic-training
+    secret:
+      defaultMode: 384
+      items:
+      - key: id_rsa
+        path: .ssh/id_rsa
+      - key: id_rsa.pub
+        path: .ssh/id_rsa.pub
+      - key: id_rsa.pub
+        path: .ssh/authorized_keys
+      - key: config
+        path: .ssh/config
+      secretName: elastic-training
+  - name: kube-api-access-qj8zb
+    projected:
+      defaultMode: 420
+      sources:
+      - serviceAccountToken:
+          expirationSeconds: 3607
+          path: token
+      - configMap:
+          items:
+          - key: ca.crt
+            path: ca.crt
+          name: kube-root-ca.crt
+      - downwardAPI:
+          items:
+          - fieldRef:
+              apiVersion: v1
+              fieldPath: metadata.namespace
+            path: namespace
